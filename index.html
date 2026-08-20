@@ -1,0 +1,2545 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+
+<!-- iPad等でのピンチズームを妨げない設定 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>技術室 工作機械予約システム</title>
+
+<style>
+/* =========================================================
+   基本設定
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Noto Sans JP",
+        "Yu Gothic",
+        Meiryo,
+        sans-serif;
+    background: #f3f6f9;
+    color: #222;
+}
+
+/* 入力欄はiPadで自動拡大されないよう16px以上 */
+input,
+select,
+textarea {
+    font-size: 16px;
+}
+
+/* =========================================================
+   ヘッダー
+   ========================================================= */
+
+header {
+    background: #1f4e79;
+    color: white;
+    padding: 12px 18px;
+}
+
+.header-title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.header-sub {
+    margin-top: 4px;
+    font-size: 15px;
+}
+
+/* =========================================================
+   ナビゲーション
+   ========================================================= */
+
+nav {
+    background: white;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    gap: 6px;
+    padding: 8px;
+    overflow-x: auto;
+}
+
+nav button {
+    min-height: 44px;
+    padding: 8px 16px;
+    border: 1px solid #bbb;
+    border-radius: 8px;
+    background: white;
+    font-size: 16px;
+    white-space: nowrap;
+}
+
+nav button.active {
+    background: #1f4e79;
+    color: white;
+}
+
+/* =========================================================
+   共通レイアウト
+   ========================================================= */
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.panel {
+    background: white;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+
+.panel h2 {
+    margin-top: 0;
+    font-size: 21px;
+}
+
+/* =========================================================
+   授業情報
+   ========================================================= */
+
+.lesson-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+.info-box {
+    background: #eef5fb;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.info-label {
+    font-size: 13px;
+    color: #555;
+}
+
+.info-value {
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 3px;
+}
+
+/* =========================================================
+   ボタン
+   ========================================================= */
+
+button {
+    min-height: 44px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #aaa;
+    cursor: pointer;
+    font-size: 16px;
+    touch-action: manipulation;
+}
+
+button.primary {
+    background: #1f4e79;
+    color: white;
+    border-color: #1f4e79;
+}
+
+button.success {
+    background: #198754;
+    color: white;
+    border-color: #198754;
+}
+
+button.danger {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+button.warning {
+    background: #f0ad4e;
+    color: #222;
+    border-color: #f0ad4e;
+}
+
+button.secondary {
+    background: #eee;
+}
+
+/* =========================================================
+   フォーム
+   ========================================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+label {
+    font-weight: bold;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid #aaa;
+    border-radius: 7px;
+    padding: 8px 10px;
+    background: white;
+}
+
+/* =========================================================
+   予約状況
+   ========================================================= */
+
+.machine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 14px;
+}
+
+.machine-card {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.machine-title {
+    background: #e9f1f8;
+    padding: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.machine-body {
+    padding: 10px;
+}
+
+.reservation {
+    border-left: 6px solid #1f4e79;
+    background: #f7f9fb;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+}
+
+.reservation.active {
+    border-left-color: #198754;
+    background: #e9f8ef;
+}
+
+.reservation.finished {
+    opacity: 0.55;
+}
+
+.reservation-time {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.reservation-user {
+    margin-top: 4px;
+    font-size: 17px;
+}
+
+.status {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 13px;
+    background: #ddd;
+}
+
+.status.active {
+    background: #198754;
+    color: white;
+}
+
+.status.next {
+    background: #f0ad4e;
+}
+
+/* =========================================================
+   機械設定
+   ========================================================= */
+
+.machine-setting {
+    display: grid;
+    grid-template-columns: 1fr 120px auto;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+/* =========================================================
+   テーブル
+   ========================================================= */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 750px;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background: #eef2f5;
+}
+
+/* =========================================================
+   通知
+   ========================================================= */
+
+#alertArea {
+    position: fixed;
+    left: 50%;
+    top: 20px;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: min(90%, 600px);
+}
+
+.alert {
+    background: #fff3cd;
+    border: 3px solid #f0ad4e;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* =========================================================
+   著作表示
+   ========================================================= */
+
+.copyright {
+    position: fixed;
+    right: 8px;
+    bottom: 6px;
+    font-size: 12px;
+    color: #666;
+    background: rgba(255,255,255,0.8);
+    padding: 3px 6px;
+    border-radius: 4px;
+    z-index: 1000;
+}
+
+/* =========================================================
+   スマートフォン対応
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .header-title {
+        font-size: 20px;
+    }
+
+    .lesson-info {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .machine-setting {
+        grid-template-columns: 1fr;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    .panel {
+        padding: 12px;
+    }
+
+    .reservation-time {
+        font-size: 18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-title">技術室 工作機械予約システム</div>
+    <div class="header-sub">
+        授業中の工作機械の使用予約を管理します
+    </div>
+</header>
+
+<nav>
+    <button id="navMain" class="active" onclick="showPage('main')">
+        予約状況
+    </button>
+
+    <button id="navReserve" onclick="showPage('reserve')">
+        生徒予約
+    </button>
+
+    <button id="navTeacher" onclick="showPage('teacher')">
+        教師設定
+    </button>
+
+    <button id="navData" onclick="showPage('data')">
+        保存データ
+    </button>
+</nav>
+
+<div class="container">
+
+<!-- =====================================================
+     予約状況画面
+     ===================================================== -->
+
+<section id="pageMain">
+
+    <div class="panel">
+
+        <div class="lesson-info">
+
+            <div class="info-box">
+                <div class="info-label">授業日</div>
+                <div id="displayDate" class="info-value">
+                    -
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">授業時間</div>
+                <div id="displayTime" class="info-value">
+                    -
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">最大使用時間</div>
+                <div id="displayMaxTime" class="info-value">
+                    -
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="panel">
+
+        <h2>現在の予約状況</h2>
+
+        <div id="machineGrid" class="machine-grid">
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     生徒予約画面
+     ===================================================== -->
+
+<section id="pageReserve" style="display:none;">
+
+    <div class="panel">
+
+        <h2>工作機械を予約する</h2>
+
+        <div class="form-grid">
+
+            <!-- 学年 -->
+            <div class="form-group">
+                <label for="studentGrade">
+                    学年
+                </label>
+
+                <select id="studentGrade">
+                    <option value="">選択してください</option>
+                    <option value="1">1年</option>
+                    <option value="2">2年</option>
+                    <option value="3">3年</option>
+                </select>
+            </div>
+
+            <!-- 学級 -->
+            <div class="form-group">
+                <label for="studentClass">
+                    学級
+                </label>
+
+                <select id="studentClass">
+                    <option value="">選択してください</option>
+                    <option value="1">1組</option>
+                    <option value="2">2組</option>
+                    <option value="3">3組</option>
+                    <option value="4">4組</option>
+                    <option value="5">5組</option>
+                    <option value="6">6組</option>
+                </select>
+            </div>
+
+            <!-- 名簿番号 -->
+            <div class="form-group">
+                <label for="studentNumber">
+                    名簿番号
+                </label>
+
+                <input
+                    type="number"
+                    id="studentNumber"
+                    min="1"
+                    max="99"
+                    placeholder="例：12"
+                >
+            </div>
+
+            <!-- 機械 -->
+            <div class="form-group">
+                <label for="machineSelect">
+                    使用する機械
+                </label>
+
+                <select id="machineSelect">
+                </select>
+            </div>
+
+            <!-- 開始時間 -->
+            <div class="form-group">
+                <label for="startTime">
+                    使用開始時間
+                </label>
+
+                <select id="startTime">
+                </select>
+            </div>
+
+            <!-- 終了時間 -->
+            <div class="form-group">
+                <label for="endTime">
+                    使用終了時間
+                </label>
+
+                <select id="endTime">
+                </select>
+            </div>
+
+        </div>
+
+        <br>
+
+        <button class="primary"
+                onclick="makeReservation()">
+            この内容で予約する
+        </button>
+
+    </div>
+
+    <div class="panel">
+
+        <h2>予約するときの注意</h2>
+
+        <ul>
+            <li>授業時間外の予約はできません。</li>
+            <li>1台の機械に同じ時間の予約はできません。</li>
+            <li>教師が設定した最大使用時間を超える予約はできません。</li>
+            <li>学年・学級・名簿番号を正しく入力してください。</li>
+        </ul>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     教師設定画面
+     ===================================================== -->
+
+<section id="pageTeacher" style="display:none;">
+
+    <div class="panel">
+
+        <h2>授業時間設定</h2>
+
+        <div class="form-grid">
+
+            <!-- ★今回追加：授業日 -->
+            <div class="form-group full">
+
+                <label for="lessonDate">
+                    授業日
+                </label>
+
+                <input
+                    type="date"
+                    id="lessonDate"
+                >
+
+                <small>
+                    この授業で使用する日付を設定してください。
+                </small>
+
+            </div>
+
+            <!-- 授業開始 -->
+            <div class="form-group">
+
+                <label for="lessonStart">
+                    授業開始時刻
+                </label>
+
+                <input
+                    type="time"
+                    id="lessonStart"
+                >
+
+            </div>
+
+            <!-- 授業終了 -->
+            <div class="form-group">
+
+                <label for="lessonEnd">
+                    授業終了時刻
+                </label>
+
+                <input
+                    type="time"
+                    id="lessonEnd"
+                >
+
+            </div>
+
+            <!-- 最大使用時間 -->
+            <div class="form-group full">
+
+                <label for="maxUseMinutes">
+                    1台の機械の最大使用時間（分）
+                </label>
+
+                <input
+                    type="number"
+                    id="maxUseMinutes"
+                    min="1"
+                    max="180"
+                >
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <button
+            class="primary"
+            onclick="saveLessonSettings()">
+            授業時間を保存
+        </button>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h2>工作機械の設定</h2>
+
+        <p>
+            教室にある工作機械の種類と台数を設定します。
+        </p>
+
+        <div id="machineSettings">
+        </div>
+
+        <br>
+
+        <button
+            class="secondary"
+            onclick="addMachineSetting()">
+            ＋ 機械を追加
+        </button>
+
+        <button
+            class="primary"
+            onclick="saveMachineSettings()">
+            機械設定を保存
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     保存データ
+     ===================================================== -->
+
+<section id="pageData" style="display:none;">
+
+    <div class="panel">
+
+        <h2>保存データ</h2>
+
+        <button
+            class="primary"
+            onclick="downloadCSV()">
+            CSVダウンロード
+        </button>
+
+        <button
+            class="danger"
+            onclick="deleteAllReservations()">
+            予約データをすべて削除
+        </button>
+
+        <br><br>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>授業日</th>
+                        <th>学年</th>
+                        <th>学級</th>
+                        <th>名簿番号</th>
+                        <th>機械</th>
+                        <th>開始</th>
+                        <th>終了</th>
+                        <th>進捗</th>
+                        <th>登録日時</th>
+                        <th>操作</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="dataTable">
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+</div>
+
+
+<!-- 通知表示 -->
+<div id="alertArea"></div>
+
+<!-- 著作表示 -->
+<div class="copyright">
+    ©2026 KOIWA Taisuke
+</div>
+
+
+<script>
+
+/* =========================================================
+   localStorageの保存キー
+   ========================================================= */
+
+const SETTINGS_KEY =
+    "kikaiYoyaku_settings_v2";
+
+const RESERVATIONS_KEY =
+    "kikaiYoyaku_reservations_v2";
+
+
+/* =========================================================
+   初期設定
+   ========================================================= */
+
+let settings = {
+
+    // ★授業日を設定
+    lessonDate: "",
+
+    lessonStart: "09:00",
+
+    lessonEnd: "10:00",
+
+    maxUseMinutes: 20,
+
+    machines: [
+        {
+            id: "m1",
+            name: "ボール盤",
+            count: 2
+        },
+        {
+            id: "m2",
+            name: "糸のこ盤",
+            count: 2
+        },
+        {
+            id: "m3",
+            name: "卓上グラインダー",
+            count: 1
+        }
+    ]
+
+};
+
+
+/* =========================================================
+   予約データ
+   ========================================================= */
+
+let reservations = [];
+
+
+/* =========================================================
+   起動時処理
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    loadData();
+
+    renderAll();
+
+    // 1秒ごとに予約状況を更新
+    setInterval(() => {
+
+        updateReservationStatus();
+
+        renderMain();
+
+        checkNotification();
+
+    }, 1000);
+
+});
+
+
+/* =========================================================
+   データ読み込み
+   ========================================================= */
+
+function loadData() {
+
+    const savedSettings =
+        localStorage.getItem(SETTINGS_KEY);
+
+    if (savedSettings) {
+
+        try {
+
+            settings =
+                JSON.parse(savedSettings);
+
+        } catch (e) {
+
+            console.error(e);
+
+        }
+
+    }
+
+
+    const savedReservations =
+        localStorage.getItem(RESERVATIONS_KEY);
+
+    if (savedReservations) {
+
+        try {
+
+            reservations =
+                JSON.parse(savedReservations);
+
+        } catch (e) {
+
+            reservations = [];
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   データ保存
+   ========================================================= */
+
+function saveData() {
+
+    localStorage.setItem(
+        SETTINGS_KEY,
+        JSON.stringify(settings)
+    );
+
+    localStorage.setItem(
+        RESERVATIONS_KEY,
+        JSON.stringify(reservations)
+    );
+
+}
+
+
+/* =========================================================
+   画面切り替え
+   ========================================================= */
+
+function showPage(page) {
+
+    document.getElementById("pageMain").style.display =
+        page === "main" ? "block" : "none";
+
+    document.getElementById("pageReserve").style.display =
+        page === "reserve" ? "block" : "none";
+
+    document.getElementById("pageTeacher").style.display =
+        page === "teacher" ? "block" : "none";
+
+    document.getElementById("pageData").style.display =
+        page === "data" ? "block" : "none";
+
+
+    document.querySelectorAll("nav button")
+        .forEach(button => {
+            button.classList.remove("active");
+        });
+
+
+    if (page === "main") {
+
+        document.getElementById("navMain")
+            .classList.add("active");
+
+    }
+
+    if (page === "reserve") {
+
+        document.getElementById("navReserve")
+            .classList.add("active");
+
+    }
+
+    if (page === "teacher") {
+
+        document.getElementById("navTeacher")
+            .classList.add("active");
+
+        renderTeacherSettings();
+
+    }
+
+    if (page === "data") {
+
+        document.getElementById("navData")
+            .classList.add("active");
+
+        renderDataTable();
+
+    }
+
+}
+
+
+/* =========================================================
+   全画面更新
+   ========================================================= */
+
+function renderAll() {
+
+    renderMain();
+
+    renderTeacherSettings();
+
+    renderMachineSelect();
+
+    renderTimeSelects();
+
+    renderDataTable();
+
+}
+
+
+/* =========================================================
+   メイン画面
+   ========================================================= */
+
+function renderMain() {
+
+    const date =
+        settings.lessonDate || "未設定";
+
+    document.getElementById("displayDate")
+        .textContent = formatDate(date);
+
+
+    document.getElementById("displayTime")
+        .textContent =
+        `${settings.lessonStart} ～ ${settings.lessonEnd}`;
+
+
+    document.getElementById("displayMaxTime")
+        .textContent =
+        `${settings.maxUseMinutes}分`;
+
+
+    const grid =
+        document.getElementById("machineGrid");
+
+    grid.innerHTML = "";
+
+
+    settings.machines.forEach(machine => {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "machine-card";
+
+
+        const title =
+            document.createElement("div");
+
+        title.className =
+            "machine-title";
+
+        title.textContent =
+            `${machine.name}　${machine.count}台`;
+
+        card.appendChild(title);
+
+
+        const body =
+            document.createElement("div");
+
+        body.className =
+            "machine-body";
+
+
+        /*
+         * 機械1種類について、
+         * 1号機、2号機……と表示
+         */
+
+        for (let i = 1; i <= machine.count; i++) {
+
+            const machineId =
+                machine.id + "-" + i;
+
+
+            const machineReservations =
+                reservations
+                    .filter(r =>
+                        r.date === settings.lessonDate &&
+                        r.machineId === machine.id &&
+                        r.machineNumber === i
+                    )
+                    .sort((a,b) =>
+                        a.start.localeCompare(b.start)
+                    );
+
+
+            const machineTitle =
+                document.createElement("div");
+
+            machineTitle.style.fontWeight =
+                "bold";
+
+            machineTitle.style.margin =
+                "8px 0";
+
+            machineTitle.textContent =
+                `${i}号機`;
+
+            body.appendChild(machineTitle);
+
+
+            if (machineReservations.length === 0) {
+
+                const empty =
+                    document.createElement("div");
+
+                empty.textContent =
+                    "予約なし";
+
+                empty.style.color =
+                    "#777";
+
+                empty.style.padding =
+                    "5px";
+
+                body.appendChild(empty);
+
+            }
+
+
+            machineReservations.forEach(r => {
+
+                const div =
+                    document.createElement("div");
+
+                div.className =
+                    "reservation " + r.status;
+
+
+                const time =
+                    document.createElement("div");
+
+                time.className =
+                    "reservation-time";
+
+                time.textContent =
+                    `${r.start} ～ ${r.end}`;
+
+
+                const user =
+                    document.createElement("div");
+
+                user.className =
+                    "reservation-user";
+
+                user.textContent =
+                    `${r.grade}年${r.className}組・${r.studentNumber}番`;
+
+
+                const status =
+                    document.createElement("div");
+
+                status.className =
+                    "status";
+
+
+                if (r.status === "active") {
+
+                    status.classList.add("active");
+
+                    status.textContent =
+                        "使用中";
+
+                } else if (r.status === "finished") {
+
+                    status.textContent =
+                        "終了";
+
+                } else {
+
+                    status.textContent =
+                        "予約";
+
+                }
+
+
+                div.appendChild(time);
+
+                div.appendChild(user);
+
+                div.appendChild(status);
+
+
+                body.appendChild(div);
+
+            });
+
+        }
+
+
+        card.appendChild(body);
+
+        grid.appendChild(card);
+
+    });
+
+}
+
+
+/* =========================================================
+   日付表示
+   ========================================================= */
+
+function formatDate(dateString) {
+
+    if (!dateString) {
+
+        return "未設定";
+
+    }
+
+    const date =
+        new Date(dateString + "T00:00:00");
+
+    if (isNaN(date.getTime())) {
+
+        return dateString;
+
+    }
+
+    const days =
+        ["日","月","火","水","木","金","土"];
+
+    return `${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,"0")}/${String(date.getDate()).padStart(2,"0")}（${days[date.getDay()]}）`;
+
+}
+
+
+/* =========================================================
+   教師設定画面
+   ========================================================= */
+
+function renderTeacherSettings() {
+
+    document.getElementById("lessonDate").value =
+        settings.lessonDate || "";
+
+    document.getElementById("lessonStart").value =
+        settings.lessonStart;
+
+    document.getElementById("lessonEnd").value =
+        settings.lessonEnd;
+
+    document.getElementById("maxUseMinutes").value =
+        settings.maxUseMinutes;
+
+
+    const container =
+        document.getElementById("machineSettings");
+
+    container.innerHTML = "";
+
+
+    settings.machines.forEach((machine, index) => {
+
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "machine-setting";
+
+
+        const name =
+            document.createElement("input");
+
+        name.type = "text";
+
+        name.value = machine.name;
+
+        name.dataset.index = index;
+
+
+        const count =
+            document.createElement("input");
+
+        count.type = "number";
+
+        count.min = 1;
+
+        count.max = 20;
+
+        count.value = machine.count;
+
+        count.dataset.index = index;
+
+
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.className =
+            "danger";
+
+        deleteButton.textContent =
+            "削除";
+
+        deleteButton.onclick = () => {
+
+            if (confirm(
+                `${machine.name}を削除しますか？`
+            )) {
+
+                settings.machines.splice(
+                    index,
+                    1
+                );
+
+                saveData();
+
+                renderAll();
+
+            }
+
+        };
+
+
+        row.appendChild(name);
+
+        row.appendChild(count);
+
+        row.appendChild(deleteButton);
+
+        container.appendChild(row);
+
+    });
+
+}
+
+
+/* =========================================================
+   授業時間設定を保存
+   ========================================================= */
+
+function saveLessonSettings() {
+
+    const date =
+        document.getElementById("lessonDate").value;
+
+    const start =
+        document.getElementById("lessonStart").value;
+
+    const end =
+        document.getElementById("lessonEnd").value;
+
+    const max =
+        Number(
+            document.getElementById("maxUseMinutes").value
+        );
+
+
+    if (!date) {
+
+        alert("授業日を設定してください。");
+
+        return;
+
+    }
+
+
+    if (!start || !end) {
+
+        alert("授業開始時刻と終了時刻を設定してください。");
+
+        return;
+
+    }
+
+
+    if (start >= end) {
+
+        alert("授業終了時刻は開始時刻より後にしてください。");
+
+        return;
+
+    }
+
+
+    if (max <= 0) {
+
+        alert("最大使用時間を設定してください。");
+
+        return;
+
+    }
+
+
+    settings.lessonDate = date;
+
+    settings.lessonStart = start;
+
+    settings.lessonEnd = end;
+
+    settings.maxUseMinutes = max;
+
+
+    saveData();
+
+    renderAll();
+
+
+    alert(
+        `授業時間を保存しました。\n\n${formatDate(date)}\n${start} ～ ${end}`
+    );
+
+}
+
+
+/* =========================================================
+   機械設定追加
+   ========================================================= */
+
+function addMachineSetting() {
+
+    const id =
+        "m" + Date.now();
+
+    settings.machines.push({
+
+        id: id,
+
+        name: "新しい機械",
+
+        count: 1
+
+    });
+
+
+    renderTeacherSettings();
+
+}
+
+
+/* =========================================================
+   機械設定保存
+   ========================================================= */
+
+function saveMachineSettings() {
+
+    const rows =
+        document.querySelectorAll(
+            "#machineSettings .machine-setting"
+        );
+
+
+    rows.forEach((row, index) => {
+
+        const inputs =
+            row.querySelectorAll("input");
+
+        if (settings.machines[index]) {
+
+            settings.machines[index].name =
+                inputs[0].value.trim() ||
+                "名称未設定";
+
+            settings.machines[index].count =
+                Math.max(
+                    1,
+                    Number(inputs[1].value)
+                );
+
+        }
+
+    });
+
+
+    saveData();
+
+    renderAll();
+
+    alert("工作機械の設定を保存しました。");
+
+}
+
+
+/* =========================================================
+   機械選択欄
+   ========================================================= */
+
+function renderMachineSelect() {
+
+    const select =
+        document.getElementById("machineSelect");
+
+    select.innerHTML =
+        '<option value="">機械を選択してください</option>';
+
+
+    settings.machines.forEach(machine => {
+
+        for (
+            let i = 1;
+            i <= machine.count;
+            i++
+        ) {
+
+            const option =
+                document.createElement("option");
+
+            option.value =
+                `${machine.id}|${i}`;
+
+            option.textContent =
+                `${machine.name} ${i}号機`;
+
+            select.appendChild(option);
+
+        }
+
+    });
+
+}
+
+
+/* =========================================================
+   時刻選択欄
+   ========================================================= */
+
+function renderTimeSelects() {
+
+    const startSelect =
+        document.getElementById("startTime");
+
+    const endSelect =
+        document.getElementById("endTime");
+
+
+    startSelect.innerHTML = "";
+
+    endSelect.innerHTML = "";
+
+
+    const startMinutes =
+        timeToMinutes(settings.lessonStart);
+
+    const endMinutes =
+        timeToMinutes(settings.lessonEnd);
+
+
+    for (
+        let m = startMinutes;
+        m < endMinutes;
+        m += 5
+    ) {
+
+        const time =
+            minutesToTime(m);
+
+
+        const option1 =
+            document.createElement("option");
+
+        option1.value = time;
+
+        option1.textContent = time;
+
+        startSelect.appendChild(option1);
+
+
+        const option2 =
+            document.createElement("option");
+
+        option2.value = time;
+
+        option2.textContent = time;
+
+        endSelect.appendChild(option2);
+
+    }
+
+
+    /*
+     * 初期値
+     */
+
+    if (startSelect.options.length > 0) {
+
+        startSelect.value =
+            startSelect.options[0].value;
+
+    }
+
+
+    const firstEnd =
+        Math.min(
+            startMinutes +
+            settings.maxUseMinutes,
+            endMinutes
+        );
+
+    endSelect.value =
+        minutesToTime(firstEnd);
+
+}
+
+
+/* =========================================================
+   時刻変更時
+   ========================================================= */
+
+document.addEventListener(
+    "change",
+    event => {
+
+        if (event.target.id !== "startTime") {
+
+            return;
+
+        }
+
+
+        const start =
+            timeToMinutes(event.target.value);
+
+        const lessonEnd =
+            timeToMinutes(settings.lessonEnd);
+
+
+        /*
+         * 最大使用時間を超えない
+         * 終了時刻を自動設定
+         */
+
+        const end =
+            Math.min(
+                start + settings.maxUseMinutes,
+                lessonEnd
+            );
+
+
+        document.getElementById("endTime").value =
+            minutesToTime(end);
+
+    }
+);
+
+
+/* =========================================================
+   時刻変換
+   ========================================================= */
+
+function timeToMinutes(time) {
+
+    const [h,m] =
+        time.split(":").map(Number);
+
+    return h * 60 + m;
+
+}
+
+
+function minutesToTime(minutes) {
+
+    const h =
+        Math.floor(minutes / 60);
+
+    const m =
+        minutes % 60;
+
+
+    return (
+        String(h).padStart(2,"0")
+        + ":" +
+        String(m).padStart(2,"0")
+    );
+
+}
+
+
+/* =========================================================
+   予約登録
+   ========================================================= */
+
+function makeReservation() {
+
+    const grade =
+        document.getElementById(
+            "studentGrade"
+        ).value;
+
+    const className =
+        document.getElementById(
+            "studentClass"
+        ).value;
+
+    const studentNumber =
+        document.getElementById(
+            "studentNumber"
+        ).value.trim();
+
+    const machineValue =
+        document.getElementById(
+            "machineSelect"
+        ).value;
+
+    const start =
+        document.getElementById(
+            "startTime"
+        ).value;
+
+    const end =
+        document.getElementById(
+            "endTime"
+        ).value;
+
+
+    /* -------------------------------
+       入力チェック
+       ------------------------------- */
+
+    if (!grade) {
+
+        alert("学年を選択してください。");
+
+        return;
+
+    }
+
+
+    if (!className) {
+
+        alert("学級を選択してください。");
+
+        return;
+
+    }
+
+
+    if (!studentNumber) {
+
+        alert("名簿番号を入力してください。");
+
+        return;
+
+    }
+
+
+    if (!machineValue) {
+
+        alert("使用する機械を選択してください。");
+
+        return;
+
+    }
+
+
+    const [
+        machineId,
+        machineNumber
+    ] =
+        machineValue.split("|");
+
+
+    const startMinutes =
+        timeToMinutes(start);
+
+    const endMinutes =
+        timeToMinutes(end);
+
+
+    const lessonStart =
+        timeToMinutes(settings.lessonStart);
+
+    const lessonEnd =
+        timeToMinutes(settings.lessonEnd);
+
+
+    /* 授業時間チェック */
+
+    if (
+        startMinutes < lessonStart ||
+        endMinutes > lessonEnd
+    ) {
+
+        alert(
+            "授業時間外の予約はできません。"
+        );
+
+        return;
+
+    }
+
+
+    /* 時間順チェック */
+
+    if (endMinutes <= startMinutes) {
+
+        alert(
+            "終了時刻は開始時刻より後にしてください。"
+        );
+
+        return;
+
+    }
+
+
+    /* 最大使用時間チェック */
+
+    if (
+        endMinutes - startMinutes >
+        settings.maxUseMinutes
+    ) {
+
+        alert(
+            `1台の機械を使用できる最大時間は${settings.maxUseMinutes}分です。`
+        );
+
+        return;
+
+    }
+
+
+    /* --------------------------------
+       同じ機械・同じ台の重複チェック
+       -------------------------------- */
+
+    const overlap =
+        reservations.some(r => {
+
+            if (
+                r.date !== settings.lessonDate
+            ) {
+                return false;
+            }
+
+            if (
+                r.machineId !== machineId
+            ) {
+                return false;
+            }
+
+            if (
+                Number(r.machineNumber) !==
+                Number(machineNumber)
+            ) {
+                return false;
+            }
+
+            const rStart =
+                timeToMinutes(r.start);
+
+            const rEnd =
+                timeToMinutes(r.end);
+
+
+            return (
+                startMinutes < rEnd &&
+                endMinutes > rStart
+            );
+
+        });
+
+
+    if (overlap) {
+
+        alert(
+            "この機械・台は、その時間にすでに予約されています。"
+        );
+
+        return;
+
+    }
+
+
+    /* --------------------------------
+       予約データ作成
+       -------------------------------- */
+
+    const reservation = {
+
+        id:
+            "r" + Date.now(),
+
+        /* 授業日 */
+        date:
+            settings.lessonDate,
+
+        /* 登録日時 */
+        createdAt:
+            new Date().toISOString(),
+
+        /* 生徒情報 */
+        grade:
+            grade,
+
+        className:
+            className,
+
+        studentNumber:
+            studentNumber,
+
+        /* 機械 */
+        machineId:
+            machineId,
+
+        machineNumber:
+            Number(machineNumber),
+
+        machineName:
+            getMachineName(machineId),
+
+        /* 使用時間 */
+        start:
+            start,
+
+        end:
+            end,
+
+        /* 進捗状況 */
+        status:
+            "reserved"
+
+    };
+
+
+    reservations.push(reservation);
+
+    saveData();
+
+    renderAll();
+
+
+    alert(
+        "予約しました。\n\n" +
+        `${reservation.machineName} ${reservation.machineNumber}号機\n` +
+        `${start} ～ ${end}`
+    );
+
+
+    /* 入力欄をリセット */
+
+    document.getElementById(
+        "studentNumber"
+    ).value = "";
+
+}
+
+
+/* =========================================================
+   機械名取得
+   ========================================================= */
+
+function getMachineName(id) {
+
+    const machine =
+        settings.machines.find(
+            m => m.id === id
+        );
+
+    return machine
+        ? machine.name
+        : "不明な機械";
+
+}
+
+
+/* =========================================================
+   予約状態更新
+   ========================================================= */
+
+function updateReservationStatus() {
+
+    const now =
+        new Date();
+
+    reservations.forEach(r => {
+
+        /*
+         * 授業日が今日でない場合は
+         * 現在時刻による進捗変更を行わない
+         */
+
+        const today =
+            getLocalDateString(now);
+
+        if (r.date !== today) {
+
+            return;
+
+        }
+
+
+        const current =
+            now.getHours() * 60 +
+            now.getMinutes();
+
+
+        const start =
+            timeToMinutes(r.start);
+
+        const end =
+            timeToMinutes(r.end);
+
+
+        if (current < start) {
+
+            r.status =
+                "reserved";
+
+        } else if (
+            current >= start &&
+            current < end
+        ) {
+
+            r.status =
+                "active";
+
+        } else {
+
+            r.status =
+                "finished";
+
+        }
+
+    });
+
+
+    saveData();
+
+}
+
+
+/* =========================================================
+   今日の日付
+   ========================================================= */
+
+function getLocalDateString(date) {
+
+    const y =
+        date.getFullYear();
+
+    const m =
+        String(date.getMonth()+1)
+        .padStart(2,"0");
+
+    const d =
+        String(date.getDate())
+        .padStart(2,"0");
+
+
+    return `${y}-${m}-${d}`;
+
+}
+
+
+/* =========================================================
+   予約直前通知
+   ========================================================= */
+
+let notifiedReservations = {};
+
+
+function checkNotification() {
+
+    const now =
+        new Date();
+
+    const today =
+        getLocalDateString(now);
+
+
+    if (
+        settings.lessonDate !== today
+    ) {
+
+        return;
+
+    }
+
+
+    const current =
+        now.getHours() * 60 +
+        now.getMinutes();
+
+
+    reservations.forEach(r => {
+
+        if (
+            r.date !== today
+        ) {
+            return;
+        }
+
+
+        const start =
+            timeToMinutes(r.start);
+
+
+        /*
+         * 予約開始5分前
+         */
+
+        if (
+            start - current <= 5 &&
+            start - current >= 0
+        ) {
+
+            if (
+                !notifiedReservations[r.id]
+            ) {
+
+                notifiedReservations[r.id] =
+                    true;
+
+
+                showAlert(
+                    `まもなく使用時間です<br>` +
+                    `${r.machineName} ${r.machineNumber}号機<br>` +
+                    `${r.grade}年${r.className}組・${r.studentNumber}番`
+                );
+
+
+                playNotificationSound();
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* =========================================================
+   画面上の通知
+   ========================================================= */
+
+function showAlert(message) {
+
+    const area =
+        document.getElementById(
+            "alertArea"
+        );
+
+
+    const div =
+        document.createElement("div");
+
+    div.className =
+        "alert";
+
+    div.innerHTML =
+        message;
+
+
+    area.appendChild(div);
+
+
+    setTimeout(() => {
+
+        div.remove();
+
+    }, 8000);
+
+}
+
+
+/* =========================================================
+   通知音
+   ========================================================= */
+
+function playNotificationSound() {
+
+    try {
+
+        const AudioContext =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+        const audio =
+            new AudioContext();
+
+        const oscillator =
+            audio.createOscillator();
+
+        const gain =
+            audio.createGain();
+
+
+        oscillator.connect(gain);
+
+        gain.connect(audio.destination);
+
+
+        oscillator.frequency.value =
+            880;
+
+        oscillator.type =
+            "sine";
+
+
+        gain.gain.value =
+            0.2;
+
+
+        oscillator.start();
+
+
+        setTimeout(() => {
+
+            oscillator.stop();
+
+            audio.close();
+
+        }, 700);
+
+    } catch (e) {
+
+        console.log(
+            "通知音を再生できませんでした。",
+            e
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   保存データ一覧
+   ========================================================= */
+
+function renderDataTable() {
+
+    const tbody =
+        document.getElementById(
+            "dataTable"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    /*
+     * 新しいものを上に表示
+     */
+
+    const data =
+        [...reservations]
+            .sort((a,b) =>
+                b.createdAt.localeCompare(
+                    a.createdAt
+                )
+            );
+
+
+    data.forEach(r => {
+
+        const tr =
+            document.createElement("tr");
+
+
+        tr.innerHTML = `
+
+            <td>
+                ${formatDate(r.date)}
+            </td>
+
+            <td>
+                ${escapeHTML(r.grade)}
+            </td>
+
+            <td>
+                ${escapeHTML(r.className)}
+            </td>
+
+            <td>
+                ${escapeHTML(r.studentNumber)}
+            </td>
+
+            <td>
+                ${escapeHTML(r.machineName)}
+                ${r.machineNumber}号機
+            </td>
+
+            <td>
+                ${r.start}
+            </td>
+
+            <td>
+                ${r.end}
+            </td>
+
+            <td>
+                ${getStatusText(r.status)}
+            </td>
+
+            <td>
+                ${formatCreatedAt(r.createdAt)}
+            </td>
+
+            <td>
+                <button
+                    class="danger"
+                    onclick="deleteReservation('${r.id}')">
+                    削除
+                </button>
+            </td>
+
+        `;
+
+
+        tbody.appendChild(tr);
+
+    });
+
+}
+
+
+/* =========================================================
+   進捗表示
+   ========================================================= */
+
+function getStatusText(status) {
+
+    switch(status) {
+
+        case "reserved":
+            return "予約";
+
+        case "active":
+            return "使用中";
+
+        case "finished":
+            return "終了";
+
+        default:
+            return status;
+
+    }
+
+}
+
+
+/* =========================================================
+   登録日時表示
+   ========================================================= */
+
+function formatCreatedAt(value) {
+
+    const d =
+        new Date(value);
+
+    if (isNaN(d.getTime())) {
+
+        return "";
+
+    }
+
+
+    return (
+        d.getFullYear() +
+        "/" +
+        String(d.getMonth()+1).padStart(2,"0") +
+        "/" +
+        String(d.getDate()).padStart(2,"0") +
+        " " +
+        String(d.getHours()).padStart(2,"0") +
+        ":" +
+        String(d.getMinutes()).padStart(2,"0")
+    );
+
+}
+
+
+/* =========================================================
+   予約削除
+   ========================================================= */
+
+function deleteReservation(id) {
+
+    if (
+        !confirm(
+            "この予約を削除しますか？"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    reservations =
+        reservations.filter(
+            r => r.id !== id
+        );
+
+
+    saveData();
+
+    renderAll();
+
+}
+
+
+/* =========================================================
+   全予約削除
+   ========================================================= */
+
+function deleteAllReservations() {
+
+    if (
+        !confirm(
+            "すべての予約データを削除します。\n本当によいですか？"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    reservations = [];
+
+    saveData();
+
+    renderAll();
+
+
+    alert(
+        "予約データをすべて削除しました。"
+    );
+
+}
+
+
+/* =========================================================
+   CSVダウンロード
+   ========================================================= */
+
+function downloadCSV() {
+
+    if (
+        reservations.length === 0
+    ) {
+
+        alert(
+            "保存されている予約データがありません。"
+        );
+
+        return;
+
+    }
+
+
+    const header = [
+        "授業日",
+        "学年",
+        "学級",
+        "名簿番号",
+        "機械",
+        "台番号",
+        "開始時刻",
+        "終了時刻",
+        "進捗状況",
+        "登録日時"
+    ];
+
+
+    const rows =
+        reservations.map(r => [
+
+            r.date,
+
+            r.grade,
+
+            r.className,
+
+            r.studentNumber,
+
+            r.machineName,
+
+            r.machineNumber,
+
+            r.start,
+
+            r.end,
+
+            getStatusText(r.status),
+
+            formatCreatedAt(r.createdAt)
+
+        ]);
+
+
+    const csv =
+        [header, ...rows]
+            .map(row =>
+                row.map(value =>
+                    `"${String(value)
+                        .replace(/"/g,'""')}"`
+                ).join(",")
+            )
+            .join("\r\n");
+
+
+    /*
+     * Excelで文字化けしにくいよう
+     * UTF-8 BOMを付ける
+     */
+
+    const blob =
+        new Blob(
+            ["\uFEFF" + csv],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const a =
+        document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+        `工作機械予約データ_${getLocalDateString(new Date())}.csv`;
+
+    a.click();
+
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+/* =========================================================
+   HTMLエスケープ
+   ========================================================= */
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+</script>
+
+</body>
+</html>
